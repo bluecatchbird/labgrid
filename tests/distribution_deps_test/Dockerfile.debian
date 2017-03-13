@@ -1,0 +1,22 @@
+FROM debian:stable
+ 
+RUN apt-get update
+RUN apt-get upgrade
+RUN apt-get -y install git python3 virtualenv libow-dev gcc python3-dev
+
+# add user
+RUN groupadd -r testUser
+RUN useradd --create-home -r -g testUser testUser
+RUN passwd -d testUser
+ 
+USER testUser
+WORKDIR /home/testUser
+
+RUN git clone https://github.com/labgrid-project/labgrid
+WORKDIR labgrid/
+
+RUN virtualenv -p python3 venv
+RUN . venv/bin/activate && python setup.py install
+RUN ./venv/bin/pip install autobahn
+RUN ./venv/bin/labgrid-client --help
+RUN ./venv/bin/labgrid-exporter --help
